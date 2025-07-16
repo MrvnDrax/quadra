@@ -19,18 +19,6 @@ Quadra es una aplicación web para descubrir, calificar y compartir puestos de c
 
 ---
 
-## Estructura del proyecto
-
-quadra/
-├── App/
-│ ├── backend/
-│ └── frontend/
-├── Entregables/
-├── LICENSE
-└── README.md
-
----
-
 ## Próximos pasos
 
 - Desarrollar backend con FastAPI

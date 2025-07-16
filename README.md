@@ -1,4 +1,4 @@
-# Quadra
+# Quadra — MVP Proyecto Universitario
 
 ## Descripción
 

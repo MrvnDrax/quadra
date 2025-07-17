@@ -1,0 +1,69 @@
+/* ==== Reset CSS moderno para Quadra ==== */
+
+/* 1. Eliminar márgenes y paddings por defecto */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 2. Establecer una tipografía base */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  background-color: #fff;
+  color: #111;
+}
+
+/* 3. Eliminar estilos de listas */
+ul, ol {
+  list-style: none;
+}
+
+/* 4. Eliminar estilos de enlaces */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 5. Imágenes responsivas */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* 6. Eliminar border y padding de botones y inputs */
+button, input, textarea, select {
+  font: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+/* 7. Hacer botones clickeables y accesibles */
+button {
+  cursor: pointer;
+}
+
+/* 8. Establecer herencia de color en formularios */
+input, textarea, select {
+  color: inherit;
+}
+
+/* 9. Quitar estilos por defecto en tablas */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* 10. HTML5: asegurar bloques display */
+article, aside, details, figcaption, figure,
+footer, header, main, nav, section, summary {
+  display: block;
+}

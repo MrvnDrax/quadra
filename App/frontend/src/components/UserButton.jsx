@@ -12,12 +12,14 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { IconChevronRight } from "@tabler/icons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import classes from "./styles/UserButton.module.css";
 
 export default function UserButton() {
   const [opened, { open, close }] = useDisclosure(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
 
   const form = useForm({
     initialValues: {
@@ -39,29 +41,98 @@ export default function UserButton() {
     },
   });
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchUser(token);
+    }
+  }, []);
+
+  const fetchUser = async (token) => {
+    try {
+      const res = await fetch("http://localhost:8000/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Token inválido");
+      const data = await res.json();
+      setUser(data);
+      setError("");
+    } catch {
+      localStorage.removeItem("token");
+      setUser(null);
+    }
+  };
+
+  const handleSubmit = async () => {
     const validation = form.validate();
 
     if (!validation.hasErrors) {
-      if (isLogin) {
-        console.log("Iniciar sesión con:", form.values);
-      } else {
-        console.log("Registrando con:", form.values);
-      }
+      const url = isLogin
+        ? "http://localhost:8000/login"
+        : "http://localhost:8000/register";
 
-      close();
-      form.reset();
+      try {
+        const formData = new FormData();
+        formData.append("username", form.values.email);
+        formData.append("password", form.values.password);
+
+        if (!isLogin) {
+          const avatar = `https://api.dicebear.com/6.x/fun-emoji/svg?seed=${Math.floor(
+            Math.random() * 9999
+          )}`;
+          formData.append("avatar", avatar);
+        }
+
+        const res = await fetch(url, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          let errorData;
+          try {
+            errorData = await res.json();
+          } catch {
+            errorData = { detail: "Error desconocido" };
+          }
+          throw new Error(errorData.detail || "Error desconocido");
+        }
+
+        if (isLogin) {
+          const data = await res.json();
+          localStorage.setItem("token", data.access_token);
+          await fetchUser(data.access_token);
+          close();
+          form.reset();
+        } else {
+          setIsLogin(true);
+          setError("Registro exitoso. Por favor inicia sesión.");
+          form.reset();
+        }
+      } catch (e) {
+        setError(e.message);
+      }
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setError("");
   };
 
   const switchToRegister = () => {
     setIsLogin(false);
     form.clearErrors();
+    setError("");
   };
 
   const switchToLogin = () => {
     setIsLogin(true);
     form.clearErrors();
+    setError("");
   };
 
   return (
@@ -69,18 +140,30 @@ export default function UserButton() {
       <UnstyledButton
         className={classes.user}
         onClick={() => {
-          open();
-          setIsLogin(true);
+          if (user) {
+            handleLogout();
+          } else {
+            open();
+            setIsLogin(true);
+            setError("");
+          }
         }}
       >
         <Group>
-          <Avatar radius="xl" size="lg" />
+          <Avatar
+            src={
+              user?.avatar ||
+              "https://api.dicebear.com/6.x/fun-emoji/svg?seed=👾"
+            }
+            radius="xl"
+            size="lg"
+          />
           <div style={{ flex: 1 }}>
             <Text size="sm" fw={500}>
-              Ingresa
+              {user ? `Cerrar sesión (${user.username})` : "Ingresa"}
             </Text>
             <Text c="dimmed" size="xs">
-              ¿No tienes cuenta?
+              {user ? user.email : "¿No tienes cuenta?"}
             </Text>
           </div>
           <IconChevronRight size={14} stroke={1.5} />
@@ -92,6 +175,7 @@ export default function UserButton() {
         onClose={() => {
           close();
           form.reset();
+          setError("");
         }}
         title={isLogin ? "Iniciar sesión" : "Registrarse"}
         centered
@@ -124,6 +208,12 @@ export default function UserButton() {
                 withAsterisk
                 {...form.getInputProps("confirmPassword")}
               />
+            )}
+
+            {error && (
+              <Text color="red" size="sm" align="center">
+                {error}
+              </Text>
             )}
 
             <Button type="submit">

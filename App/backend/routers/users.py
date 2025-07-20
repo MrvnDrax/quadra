@@ -33,9 +33,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 @router.post("/register")
 async def register(
-    username: str = Form(...),      # Recibe username por formulario
-    password: str = Form(...),      # Recibe password por formulario
-    avatar: Optional[str] = Form(None),  # Recibe avatar opcional
+    username: str = Form(...),      
+    password: str = Form(...),      
+    avatar: Optional[str] = Form(None),  
 ):
     query = select(User).where(User.username == username)
     existing_user = await database.fetch_one(query)
@@ -45,7 +45,7 @@ async def register(
     hashed_password = get_password_hash(password)
     user = User(
         username=username,
-        email=username,  # aquí asumes que username es email
+        email=username,  
         hashed_password=hashed_password,
         avatar=avatar
     )

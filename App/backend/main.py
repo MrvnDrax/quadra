@@ -1,22 +1,29 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  # <-- importar middleware CORS
+from fastapi.middleware.cors import CORSMiddleware
 from backend.database import database, create_db_and_tables
-from .routers import users
+from .routers import users, places
 
-app = FastAPI()
+app = FastAPI(
+    title="Quadra API",
+    description="API para la aplicación Quadra - comida real, para gente real",
+    version="1.0.0"
+)
 
-# Configuración CORS: permite tu frontend en localhost:5173 y 127.0.0.1:5173
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,      # <- permite solo estas URLs
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],        # <- permite todos los métodos HTTP
-    allow_headers=["*"],        # <- permite todos los headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.on_event("startup")
@@ -29,3 +36,12 @@ async def on_shutdown():
     await database.disconnect()
 
 app.include_router(users.router)
+app.include_router(places.router)
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Bienvenido a Quadra API",
+        "version": "1.0.0",
+        "description": "comida real, para gente real"
+    }

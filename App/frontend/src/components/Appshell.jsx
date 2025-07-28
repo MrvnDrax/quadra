@@ -1,7 +1,10 @@
 import { AppShell, Stack } from "@mantine/core";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./Navbar";
 import Header from "./Header";
 import Home from "./Home";
+import Restaurantes from "./Restaurantes";
+import AgregarLugar from "./AgregarLugar";
 import UserButton from "./UserButton";
 
 export default function Appshell() {
@@ -21,7 +24,11 @@ export default function Appshell() {
         </Stack>
       </AppShell.Navbar>
       <AppShell.Main>
-        <Home />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/restaurantes" element={<Restaurantes />} />
+          <Route path="/agregar-lugar" element={<AgregarLugar />} />
+        </Routes>
       </AppShell.Main>
     </AppShell>
   );

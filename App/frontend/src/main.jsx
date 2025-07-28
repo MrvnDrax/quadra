@@ -1,8 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createTheme, MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import "./reset.css";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import App from "./App.jsx";
 
 const theme = createTheme({
@@ -31,8 +33,6 @@ const theme = createTheme({
   fontFamily: "Montserrat Alternates, sans-serif",
 
   headings: {
-    // fontWeight: '400',
-    // fontFamily: 'Roboto',
     sizes: {
       h1: { fontSize: 80 },
     },
@@ -43,6 +43,7 @@ const theme = createTheme({
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <MantineProvider theme={theme}>
+      <Notifications />
       <App />
     </MantineProvider>
   </StrictMode>

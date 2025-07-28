@@ -11,8 +11,10 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
+import { authAPI } from "../services/api";
 import classes from "./styles/UserButton.module.css";
 
 export default function UserButton() {
@@ -23,13 +25,15 @@ export default function UserButton() {
 
   const form = useForm({
     initialValues: {
-      email: "",
+      username: "",
       password: "",
       confirmPassword: "",
     },
     validate: {
-      email: (value) =>
-        /^\S+@\S+\.\S+$/.test(value) ? null : "Correo inválido",
+      username: (value) =>
+        value.length >= 3
+          ? null
+          : "El usuario debe tener al menos 3 caracteres",
       password: (value) =>
         value.length >= 6
           ? null
@@ -42,25 +46,19 @@ export default function UserButton() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("auth_token");
     if (token) {
-      fetchUser(token);
+      fetchUser();
     }
   }, []);
 
-  const fetchUser = async (token) => {
+  const fetchUser = async () => {
     try {
-      const res = await fetch("http://localhost:8000/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) throw new Error("Token inválido");
-      const data = await res.json();
+      const data = await authAPI.getCurrentUser();
       setUser(data);
       setError("");
     } catch {
-      localStorage.removeItem("token");
+      localStorage.removeItem("auth_token");
       setUser(null);
     }
   };
@@ -69,58 +67,49 @@ export default function UserButton() {
     const validation = form.validate();
 
     if (!validation.hasErrors) {
-      const url = isLogin
-        ? "http://localhost:8000/login"
-        : "http://localhost:8000/register";
-
       try {
-        const formData = new FormData();
-        formData.append("username", form.values.email);
-        formData.append("password", form.values.password);
-
-        if (!isLogin) {
-          const avatar = `https://api.dicebear.com/6.x/fun-emoji/svg?seed=${Math.floor(
-            Math.random() * 9999
-          )}`;
-          formData.append("avatar", avatar);
-        }
-
-        const res = await fetch(url, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          let errorData;
-          try {
-            errorData = await res.json();
-          } catch {
-            errorData = { detail: "Error desconocido" };
-          }
-          throw new Error(errorData.detail || "Error desconocido");
-        }
-
+        let data;
         if (isLogin) {
-          const data = await res.json();
-          localStorage.setItem("token", data.access_token);
-          await fetchUser(data.access_token);
+          data = await authAPI.login({
+            username: form.values.username,
+            password: form.values.password,
+          });
+          localStorage.setItem("auth_token", data.access_token);
+          await fetchUser();
           close();
           form.reset();
+          notifications.show({
+            title: "Éxito",
+            message: "Sesión iniciada correctamente",
+            color: "green",
+          });
         } else {
+          await authAPI.register({
+            username: form.values.username,
+            password: form.values.password,
+          });
           setIsLogin(true);
           setError("Registro exitoso. Por favor inicia sesión.");
           form.reset();
+          notifications.show({
+            title: "Éxito",
+            message: "Usuario registrado correctamente",
+            color: "green",
+          });
         }
-      } catch (e) {
-        setError(e.message);
+      } catch (error) {
+        setError(error.message || "Error de autenticación");
       }
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    console.log("Cerrando sesión...");
+    authAPI.logout();
     setUser(null);
     setError("");
+    form.reset();
+    console.log("Sesión cerrada, token eliminado");
   };
 
   const switchToRegister = () => {
@@ -163,7 +152,7 @@ export default function UserButton() {
               {user ? `Cerrar sesión (${user.username})` : "Ingresa"}
             </Text>
             <Text c="dimmed" size="xs">
-              {user ? user.email : "¿No tienes cuenta?"}
+              {user ? `@${user.username}` : "¿No tienes cuenta?"}
             </Text>
           </div>
           <IconChevronRight size={14} stroke={1.5} />
@@ -188,10 +177,10 @@ export default function UserButton() {
         >
           <Stack>
             <TextInput
-              label="Correo"
-              placeholder="ejemplo@correo.com"
+              label="Usuario"
+              placeholder="Nombre de usuario"
               withAsterisk
-              {...form.getInputProps("email")}
+              {...form.getInputProps("username")}
             />
 
             <PasswordInput

@@ -1,13 +1,20 @@
 .user {
   display: block;
   width: 100%;
-  /* padding: var(--mantine-spacing-md); */
-  color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+  padding: 8px 12px;
+  color: var(--mantine-color-text);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 150ms ease;
+}
 
-  @mixin hover {
-    background-color: light-dark(
-      var(--mantine-color-gray-0),
-      var(--mantine-color-dark-8)
-    );
-  }
+.user:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.user[data-dark] {
+  color: var(--mantine-color-dark-0);
+}
+
+.user[data-dark]:hover {
+  background-color: var(--mantine-color-dark-8);
 }

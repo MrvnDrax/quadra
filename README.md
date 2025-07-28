@@ -77,8 +77,6 @@ Quadra es una aplicación web full-stack para descubrir, calificar y compartir p
    python -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
-   python create_tables.py
-   python create_sample_data.py
 
    # Frontend
    cd ../frontend
@@ -96,9 +94,8 @@ Quadra es una aplicación web full-stack para descubrir, calificar y compartir p
    ./start_frontend.sh
    ```
 
-   - Frontend: http://localhost:5174
+   - Frontend: http://localhost:5173
    - API: http://localhost:8000
-   - Docs: http://localhost:8000/docs
 
 ---
 
